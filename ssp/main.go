@@ -203,6 +203,20 @@ func callExchange(bidReq BidRequest) (*ExchangeResponse, error) {
 
 // ─── HTTP Handlers ────────────────────────────────────────────────────────────
 
+func recoverMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("[SSP] panic recovered: %v", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"})
+			}
+		}()
+		next(w, r)
+	}
+}
+
 func handlePublisherPage(w http.ResponseWriter, r *http.Request) {
 	// Try cwd first, then ssp/ (when run from project root via ./bin/ssp)
 	var html []byte
@@ -252,17 +266,23 @@ func handleAdRequest(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	if len(result.SeatBid) == 0 || len(result.SeatBid[0].Bid) == 0 {
+		log.Printf("[SSP] No fill for user=%s (empty seatbid)", userID)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 
-	bid := result.SeatBid[0].Bid[0]
+	seatBid := &result.SeatBid[0]
+	bid := &seatBid.Bid[0]
 	log.Printf("[SSP] Filled | winner=%s | price=$%.4f | time=%dms",
-		result.SeatBid[0].Seat, bid.Price, result.Ext.Debug.ElapsedMS)
+		seatBid.Seat, bid.Price, result.Ext.Debug.ElapsedMS)
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"adm":       bid.AdM,
-		"price":     bid.Price,
-		"winner":    result.SeatBid[0].Seat,
-		"elapsed":   result.Ext.Debug.ElapsedMS,
-		"all_bids":  result.Ext.Debug.AllBids,
+		"adm":      bid.AdM,
+		"price":    bid.Price,
+		"winner":   seatBid.Seat,
+		"elapsed":  result.Ext.Debug.ElapsedMS,
+		"all_bids": result.Ext.Debug.AllBids,
 		"bid_request": map[string]interface{}{
 			"id":      bidReq.ID,
 			"user":    bidReq.User.ID,
@@ -291,9 +311,9 @@ func main() {
 	addr := "0.0.0.0:" + port
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handlePublisherPage)
-	mux.HandleFunc("/ad", handleAdRequest)
-	mux.HandleFunc("/health", handleHealth)
+	mux.HandleFunc("/", recoverMiddleware(handlePublisherPage))
+	mux.HandleFunc("/ad", recoverMiddleware(handleAdRequest))
+	mux.HandleFunc("/health", recoverMiddleware(handleHealth))
 
 	fmt.Printf("\n📰  SSP + Publisher running on http://0.0.0.0:%s\n", port)
 	fmt.Printf("    Publisher page: http://localhost:%s\n", port)
