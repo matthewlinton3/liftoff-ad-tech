@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -145,7 +146,7 @@ type BidDebug struct {
 
 const auctionTimeoutMS = 150
 
-var registeredDSPs = []DSP{
+var defaultDSPs = []DSP{
 	{ID: "dsp-1", Name: "AlphaDSP", URL: "http://localhost:3001/bid"},
 	{ID: "dsp-2", Name: "BetaDSP", URL: "http://localhost:3002/bid"},
 	{ID: "dsp-3", Name: "GammaDSP", URL: "http://localhost:3003/bid"},
@@ -156,6 +157,27 @@ var registeredDSPs = []DSP{
 	{ID: "dsp-8", Name: "ThetaDSP", URL: "http://localhost:3008/bid"},
 	{ID: "dsp-9", Name: "IotaDSP", URL: "http://localhost:3009/bid"},
 	{ID: "dsp-10", Name: "KappaDSP", URL: "http://localhost:3010/bid"},
+}
+
+var registeredDSPs []DSP
+
+// parseDSPURLs parses DSP_URLS (comma-separated URLs) into a slice of DSP.
+// Each URL becomes one DSP with ID dsp-N and Name DSP-N.
+func parseDSPURLs(env string) []DSP {
+	var dsps []DSP
+	for i, s := range strings.Split(env, ",") {
+		url := strings.TrimSpace(s)
+		if url == "" {
+			continue
+		}
+		n := i + 1
+		dsps = append(dsps, DSP{
+			ID:   fmt.Sprintf("dsp-%d", n),
+			Name: fmt.Sprintf("DSP-%d", n),
+			URL:  url,
+		})
+	}
+	return dsps
 }
 
 var httpClient = &http.Client{
@@ -375,17 +397,27 @@ func handleDSPs(w http.ResponseWriter, r *http.Request) {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	port := "3000"
-	if p := os.Getenv("PORT"); p != "" {
-		port = p
+	if urls := os.Getenv("DSP_URLS"); urls != "" {
+		registeredDSPs = parseDSPURLs(urls)
+		if len(registeredDSPs) == 0 {
+			log.Fatal("[Exchange] DSP_URLS is set but no valid URLs parsed")
+		}
+	} else {
+		registeredDSPs = defaultDSPs
 	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	addr := "0.0.0.0:" + port
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/auction", corsMiddleware(handleAuction))
 	mux.HandleFunc("/health", corsMiddleware(handleHealth))
 	mux.HandleFunc("/dsps", corsMiddleware(handleDSPs))
 
-	fmt.Printf("\n🏦  Ad Exchange running on http://localhost:%s\n", port)
+	fmt.Printf("\n🏦  Ad Exchange running on http://0.0.0.0:%s\n", port)
 	fmt.Printf("    Registered DSPs: ")
 	for i, d := range registeredDSPs {
 		if i > 0 {
@@ -396,5 +428,5 @@ func main() {
 	fmt.Printf("\n    Auction timeout: %dms\n", auctionTimeoutMS)
 	fmt.Printf("    Endpoints: POST /auction | GET /health | GET /dsps\n\n")
 
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	log.Fatal(http.ListenAndServe(addr, mux))
 }
