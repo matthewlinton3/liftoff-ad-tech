@@ -17,7 +17,6 @@ RUN apk add --no-cache ca-certificates
 COPY --from=builder /build/ssp .
 COPY ssp/publisher.html .
 
-ENV PORT=4000
 EXPOSE 4000
 
 CMD ["./ssp"]

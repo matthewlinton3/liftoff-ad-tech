@@ -284,19 +284,20 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	port := "4000"
-	if p := os.Getenv("PORT"); p != "" {
-		port = p
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "4000"
 	}
+	addr := "0.0.0.0:" + port
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handlePublisherPage)
 	mux.HandleFunc("/ad", handleAdRequest)
 	mux.HandleFunc("/health", handleHealth)
 
-	fmt.Printf("\n📰  SSP + Publisher running on http://localhost:%s\n", port)
+	fmt.Printf("\n📰  SSP + Publisher running on http://0.0.0.0:%s\n", port)
 	fmt.Printf("    Publisher page: http://localhost:%s\n", port)
 	fmt.Printf("    Ad endpoint:    http://localhost:%s/ad\n\n", port)
 
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	log.Fatal(http.ListenAndServe(addr, mux))
 }
