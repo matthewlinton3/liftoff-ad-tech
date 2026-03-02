@@ -1,0 +1,44 @@
+{
+  "features": [
+    "device_type",
+    "os",
+    "country",
+    "hour",
+    "day_of_week",
+    "is_business_hours",
+    "is_evening",
+    "is_weekend",
+    "site_cat",
+    "ad_size",
+    "user_recency",
+    "frequency",
+    "bid_floor",
+    "connection_type",
+    "app_installs",
+    "session_depth"
+  ],
+  "auc": 0.6556161844247184,
+  "base_cvr": 0.179248,
+  "os_classes": [
+    "Android",
+    "Other",
+    "iOS"
+  ],
+  "country_classes": [
+    "BRA",
+    "CAN",
+    "DEU",
+    "GBR",
+    "IND",
+    "Other",
+    "USA"
+  ],
+  "site_classes": [
+    "Entertainment",
+    "Finance",
+    "News",
+    "Other",
+    "Sports",
+    "Tech"
+  ]
+}

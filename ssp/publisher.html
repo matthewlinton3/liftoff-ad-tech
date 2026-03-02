@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechPulse — Technology News</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0f0e0c;
+      --paper: #f5f0e8;
+      --accent: #c8392b;
+      --muted: #7a7060;
+      --border: #d4cfc4;
+      --mono: 'IBM Plex Mono', monospace;
+      --serif: 'Source Serif 4', serif;
+      --display: 'Playfair Display', serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    /* ── Masthead ── */
+    .masthead {
+      border-bottom: 3px double var(--ink);
+      padding: 16px 0 12px;
+      text-align: center;
+      position: relative;
+    }
+    .masthead-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .masthead-title {
+      font-family: var(--display);
+      font-size: clamp(42px, 8vw, 80px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+    }
+    .masthead-title span { color: var(--accent); }
+    .masthead-tagline {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .nav {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-top: 12px;
+      padding: 6px 0;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+    }
+    .nav a {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav a:hover { color: var(--accent); }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 40px;
+      padding: 32px 0;
+    }
+
+    /* ── Article ── */
+    .article-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .article-headline {
+      font-family: var(--display);
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin: 10px 0 6px;
+    }
+    .article-deck {
+      font-size: 19px;
+      color: var(--muted);
+      font-weight: 300;
+      font-style: italic;
+      border-left: 3px solid var(--accent);
+      padding-left: 16px;
+      margin: 16px 0;
+    }
+    .article-byline {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 0;
+      margin-bottom: 24px;
+    }
+    .article-body p { margin-bottom: 18px; }
+    .article-body p:first-child::first-letter {
+      font-family: var(--display);
+      font-size: 64px;
+      font-weight: 900;
+      float: left;
+      line-height: 0.8;
+      margin: 6px 8px 0 0;
+      color: var(--accent);
+    }
+    .pull-quote {
+      font-family: var(--display);
+      font-size: 22px;
+      font-style: italic;
+      border-top: 2px solid var(--ink);
+      border-bottom: 2px solid var(--ink);
+      padding: 16px 0;
+      margin: 28px 0;
+      color: var(--ink);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { border-left: 1px solid var(--border); padding-left: 32px; }
+
+    /* ── Ad Slot ── */
+    .ad-slot-wrapper {
+      margin-bottom: 32px;
+    }
+    .ad-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .ad-slot {
+      width: 300px;
+      height: 250px;
+      background: #ede8df;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .ad-slot-placeholder {
+      text-align: center;
+      color: var(--muted);
+    }
+    .ad-slot-placeholder .icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .ad-slot-placeholder p {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+    .ad-slot button {
+      margin-top: 12px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .ad-slot button:hover { background: #a02d22; }
+
+    /* ── Auction Panel ── */
+    .auction-panel {
+      background: var(--ink);
+      color: #e8e4d8;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.8;
+      min-height: 180px;
+      margin-top: 8px;
+      position: relative;
+    }
+    .auction-panel .panel-title {
+      color: var(--accent);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .auction-log { }
+    .log-line { opacity: 0; animation: fadeIn 0.3s forwards; }
+    .log-line.green { color: #7ec87e; }
+    .log-line.yellow { color: #e8c77a; }
+    .log-line.red { color: #e87a7a; }
+    .log-line.dim { color: #666; }
+    .log-line.winner { color: #fff; font-weight: 500; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-4px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .bid-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 3px 0;
+    }
+    .bid-bar-fill {
+      height: 8px;
+      background: var(--accent);
+      transition: width 0.4s ease;
+      min-width: 2px;
+    }
+    .bid-bar-fill.winner-bar { background: #7ec87e; }
+
+    /* ── Sidebar Articles ── */
+    .sidebar-section-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+    }
+    .sidebar-article {
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-article h4 {
+      font-family: var(--display);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .sidebar-article p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Loading spinner ── */
+    .spinner {
+      width: 24px; height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin: 0 auto 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Ad rendered state ── */
+    .ad-rendered { border: 2px solid #7ec87e; }
+    .ad-price-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      background: rgba(0,0,0,0.75);
+      color: #7ec87e;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 2px;
+    }
+
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="container">
+    <div class="masthead-date" id="masthead-date"></div>
+    <div class="masthead-title">Tech<span>Pulse</span></div>
+    <div class="masthead-tagline">Independent Technology Journalism</div>
+    <nav class="nav">
+      <a href="#">AI & Machine Learning</a>
+      <a href="#">Startups</a>
+      <a href="#">Markets</a>
+      <a href="#">Policy</a>
+      <a href="#">Hardware</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="layout">
+
+    <!-- Article -->
+    <article>
+      <div class="article-label">AI & Machine Learning</div>
+      <h1 class="article-headline">The Invisible Auction: How Your Attention Is Sold in Milliseconds</h1>
+      <p class="article-deck">Every webpage you visit triggers a silent bidding war. Hundreds of algorithms compete to show you an ad — and it all happens before the page finishes loading.</p>
+      <div class="article-byline">By Staff Reporter &nbsp;·&nbsp; <span id="article-date"></span> &nbsp;·&nbsp; 6 min read</div>
+
+      <div class="article-body">
+        <p>When you navigate to a webpage, something remarkable happens in the background. Before a single pixel of advertising reaches your screen, your digital profile has been evaluated, auctioned, and sold — all within the span of 100 to 200 milliseconds.</p>
+
+        <p>This system, known as real-time bidding (RTB), is the invisible infrastructure beneath the modern web. Publishers — the websites you visit — connect to supply-side platforms (SSPs) that manage their ad inventory. The SSP sends a bid request to an ad exchange, which simultaneously notifies dozens of demand-side platforms (DSPs) representing advertisers.</p>
+
+        <div class="pull-quote">"The auction is over before you've finished blinking. That's the whole game."</div>
+
+        <p>Each DSP evaluates the impression using machine learning models trained on billions of past interactions. They predict the likelihood that you will click, convert, or engage — and submit a bid reflecting that predicted value. The exchange runs a second-price auction: the highest bidder wins, but pays only one cent more than the second-highest bid.</p>
+
+        <p>Companies like Liftoff have built entire businesses on the sophistication of their prediction models. For mobile app advertisers, the difference between a 1.2% and a 1.4% predicted conversion rate can mean millions of dollars in campaign efficiency. The DSP that models user intent most accurately wins the most valuable impressions at the lowest clearing prices.</p>
+
+        <p>The ad slot to the right of this article is live. Click "Run Auction" to trigger a real bid request through a working exchange. Watch as multiple DSPs compete, and see which wins the right to show you their creative.</p>
+      </div>
+    </article>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Live Ad Slot -->
+      <div class="ad-slot-wrapper">
+        <div class="ad-label">Advertisement — Live RTB Auction</div>
+        <div class="ad-slot" id="ad-slot">
+          <div class="ad-slot-placeholder" id="ad-placeholder">
+            <div class="icon">📡</div>
+            <p>Ad slot ready</p>
+            <button onclick="runAuction()">Run Auction</button>
+          </div>
+        </div>
+        <div class="auction-panel" id="auction-panel">
+          <div class="panel-title">Auction Log</div>
+          <div class="auction-log" id="auction-log">
+            <div class="log-line dim">→ Waiting for auction trigger...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- More articles -->
+      <div class="sidebar-section-title">More Stories</div>
+      <div class="sidebar-article">
+        <h4>OpenAI's New Model Raises Questions About Benchmark Saturation</h4>
+        <p>Researchers debate whether existing evals still measure meaningful capability differences.</p>
+      </div>
+      <div class="sidebar-article">
+        <h4>Venture Funding in Ad Tech Rebounds After Two-Year Slump</h4>
+        <p>Deal volume surged 34% in Q1, led by AI-native targeting platforms.</p>
+      </div>
+      <div class="sidebar-article">
+        <h4>The Privacy Sandbox's Quiet Failure</h4>
+        <p>Google's post-cookie initiative struggles to gain traction among publishers and DSPs alike.</p>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<script>
+  // Set dates
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('masthead-date').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
+  document.getElementById('article-date').textContent = now.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+  // Unique user ID for this session
+  const uid = 'user-' + Math.random().toString(36).substr(2, 8);
+
+  function log(msg, cls = '') {
+    const el = document.createElement('div');
+    el.className = 'log-line ' + cls;
+    el.textContent = msg;
+    el.style.animationDelay = '0ms';
+    document.getElementById('auction-log').appendChild(el);
+  }
+
+  function clearLog() {
+    document.getElementById('auction-log').innerHTML = '';
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function runAuction() {
+    const slot = document.getElementById('ad-slot');
+    const placeholder = document.getElementById('ad-placeholder');
+
+    // Reset
+    slot.className = 'ad-slot';
+    placeholder.innerHTML = '<div class="spinner"></div><p style="font-family:var(--mono);font-size:11px;color:var(--muted)">Requesting bids...</p>';
+    clearLog();
+
+    log('→ Page load detected', 'dim');
+    await sleep(120);
+    log(`→ User: ${uid}`, 'dim');
+    await sleep(80);
+    log('→ SSP building bid request...', 'dim');
+    await sleep(150);
+    log('→ Sending to exchange [localhost:3000]', 'yellow');
+    await sleep(100);
+    log('→ Fanning out to 3 DSPs...', 'yellow');
+
+    const startTime = Date.now();
+
+    try {
+      const resp = await fetch(`/ad?page=${encodeURIComponent(window.location.href)}&uid=${uid}`);
+
+      if (resp.status === 204) {
+        log('✗ No fill — all DSPs passed', 'red');
+        placeholder.innerHTML = '<div style="text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px"><p>No ad served</p><button onclick="runAuction()" style="margin-top:10px;background:var(--accent);color:white;border:none;padding:6px 14px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase">Retry</button></div>';
+        return;
+      }
+
+      const data = await resp.json();
+      const elapsed = Date.now() - startTime;
+
+      await sleep(80);
+
+      // Show all bids
+      if (data.all_bids && data.all_bids.length > 0) {
+        const maxBid = Math.max(...data.all_bids.map(b => b.price));
+        for (const bid of data.all_bids) {
+          const isWinner = bid.dsp === data.winner;
+          const barWidth = Math.round((bid.price / maxBid) * 120);
+          const line = document.createElement('div');
+          line.className = 'log-line ' + (isWinner ? 'green' : 'yellow');
+          line.innerHTML = `${isWinner ? '🏆' : '  '} ${bid.dsp.padEnd(12)}: $${bid.price.toFixed(4)}`;
+          document.getElementById('auction-log').appendChild(line);
+          await sleep(120);
+        }
+      }
+
+      await sleep(100);
+      log(`→ Winner: ${data.winner}`, 'green');
+      await sleep(80);
+      log(`→ Clearing price: $${data.price.toFixed(4)}`, 'winner');
+      await sleep(80);
+      log(`→ Auction time: ${data.elapsed}ms`, 'dim');
+      await sleep(100);
+      log('→ Rendering creative...', 'dim');
+      await sleep(200);
+
+      // Render the ad
+      slot.className = 'ad-slot ad-rendered';
+      slot.innerHTML = data.adm + `<div class="ad-price-badge">$${data.price.toFixed(4)} CPM</div>`;
+
+    } catch (err) {
+      log('✗ Exchange unreachable', 'red');
+      log('  Is the exchange running on :3000?', 'dim');
+      placeholder.innerHTML = '<div style="text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px"><p>⚠ Exchange offline</p><button onclick="runAuction()" style="margin-top:10px;background:var(--accent);color:white;border:none;padding:6px 14px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase">Retry</button></div>';
+    }
+  }
+</script>
+
+</body>
+</html>
