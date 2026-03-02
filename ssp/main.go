@@ -96,7 +96,12 @@ type BidDebug struct {
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const exchangeURL = "http://localhost:3000/auction"
+func getExchangeURL() string {
+	if u := os.Getenv("EXCHANGE_URL"); u != "" {
+		return u
+	}
+	return "http://localhost:3000/auction"
+}
 
 var userAgents = []string{
 	"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
@@ -179,7 +184,7 @@ func containsHelper(s, sub string) bool {
 
 func callExchange(bidReq BidRequest) (*ExchangeResponse, error) {
 	body, _ := json.Marshal(bidReq)
-	resp, err := http.Post(exchangeURL, "application/json", bytes.NewReader(body))
+	resp, err := http.Post(getExchangeURL(), "application/json", bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("exchange unreachable: %w", err)
 	}
