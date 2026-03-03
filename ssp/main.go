@@ -220,10 +220,9 @@ func recoverMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func handlePublisherPage(w http.ResponseWriter, r *http.Request) {
-	// Try cwd first, then ssp/ (when run from project root via ./bin/ssp)
+func serveHTML(w http.ResponseWriter, paths []string, name string) {
 	var html []byte
-	for _, path := range []string{"publisher.html", "ssp/publisher.html"} {
+	for _, path := range paths {
 		var err error
 		html, err = os.ReadFile(path)
 		if err == nil {
@@ -231,14 +230,22 @@ func handlePublisherPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if len(html) == 0 {
-		log.Printf("[SSP] WARNING: publisher.html not found (tried publisher.html, ssp/publisher.html)")
+		log.Printf("[SSP] WARNING: %s not found", name)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte("<html><body><h1>Publisher page not found</h1><p>Run the SSP from the project root or from the ssp/ directory.</p></body></html>"))
+		w.Write([]byte("<html><body><h1>Page not found</h1><p>Run the SSP from the project root or from the ssp/ directory.</p></body></html>"))
 		return
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.Write(html)
+}
+
+func handlePublisherPage(w http.ResponseWriter, r *http.Request) {
+	serveHTML(w, []string{"publisher.html", "ssp/publisher.html"}, "publisher.html")
+}
+
+func handleMarketplacePage(w http.ResponseWriter, r *http.Request) {
+	serveHTML(w, []string{"marketplace.html", "ssp/marketplace.html"}, "marketplace.html")
 }
 
 func handleAdRequest(w http.ResponseWriter, r *http.Request) {
@@ -315,6 +322,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", recoverMiddleware(handlePublisherPage))
+	mux.HandleFunc("/marketplace", recoverMiddleware(handleMarketplacePage))
 	mux.HandleFunc("/ad", recoverMiddleware(handleAdRequest))
 	mux.HandleFunc("/health", recoverMiddleware(handleHealth))
 

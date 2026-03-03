@@ -15,7 +15,7 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates wget
 
 COPY --from=builder /build/ssp .
-COPY ssp/publisher.html .
+COPY ssp/publisher.html ssp/marketplace.html .
 
 EXPOSE 4000
 
