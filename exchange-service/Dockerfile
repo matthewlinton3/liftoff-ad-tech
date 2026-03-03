@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25 AS builder
 WORKDIR /build
 
 COPY go.mod ./
@@ -9,10 +9,10 @@ COPY . ./
 RUN CGO_ENABLED=0 go build -o exchange .
 
 # Run stage
-FROM alpine:3.19
+FROM debian:bookworm-slim
 WORKDIR /app
 
-RUN apk add --no-cache ca-certificates wget
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /build/exchange .
 
