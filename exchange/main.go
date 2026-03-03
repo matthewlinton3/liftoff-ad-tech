@@ -379,6 +379,19 @@ func handleAuction(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "ok",
+		"service": "exchange",
+		"dsps":    len(registeredDSPs),
+	})
+}
+
 func handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
@@ -413,6 +426,7 @@ func main() {
 	addr := "0.0.0.0:" + port
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", corsMiddleware(handleRoot))
 	mux.HandleFunc("/auction", corsMiddleware(handleAuction))
 	mux.HandleFunc("/health", corsMiddleware(handleHealth))
 	mux.HandleFunc("/dsps", corsMiddleware(handleDSPs))
