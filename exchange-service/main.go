@@ -184,6 +184,43 @@ var httpClient = &http.Client{
 	Timeout: time.Duration(auctionTimeoutMS) * time.Millisecond,
 }
 
+// Simulated fallback DSPs when all real DSPs fail to respond.
+var simulatedDSPNames = []string{"Nike", "Apple", "American Express", "Coca-Cola", "Samsung", "Toyota"}
+
+// generateSimulatedBids returns 3–5 fake bids from industry-brand DSPs so the auction always has a winner.
+func generateSimulatedBids(floor float64, impID string) []CollectedBid {
+	minPrice := floor
+	if minPrice < 0.50 {
+		minPrice = 0.50
+	}
+	n := 3 + rand.Intn(3) // 3–5 bids
+	used := make(map[int]bool)
+	out := make([]CollectedBid, 0, n)
+	for len(out) < n {
+		idx := rand.Intn(len(simulatedDSPNames))
+		if used[idx] {
+			continue
+		}
+		used[idx] = true
+		price := minPrice + rand.Float64()*(5.00-minPrice)
+		price = float64(int(price*100)) / 100
+		name := simulatedDSPNames[idx]
+		dsp := DSP{ID: "sim-" + fmt.Sprintf("%d", idx+1), Name: name, URL: ""}
+		bid := &Bid{
+			ID:    fmt.Sprintf("sim-bid-%d", len(out)+1),
+			ImpID: impID,
+			Price: price,
+			AdID:  "sim-ad",
+			AdM:   fmt.Sprintf("<div>Simulated ad from %s</div>", name),
+			CrID:  "sim-creative",
+			W:     300,
+			H:     250,
+		}
+		out = append(out, CollectedBid{DSP: dsp, Bid: bid, Error: nil})
+	}
+	return out
+}
+
 // ─── Auction Logic ────────────────────────────────────────────────────────────
 
 // secondPriceAuction runs a Vickrey (second-price) auction.
@@ -317,8 +354,13 @@ func handleAuction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	floor := 0.0
+	impID := "1"
 	if len(bidRequest.Imp) > 0 {
 		floor = bidRequest.Imp[0].BidFloor
+		impID = bidRequest.Imp[0].ID
+		if impID == "" {
+			impID = "1"
+		}
 	}
 
 	log.Printf("[Exchange] Auction %s | floor=$%.2f", auctionID, floor)
@@ -339,6 +381,15 @@ func handleAuction(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("[Exchange]   %s: $%.4f", b.DSP.Name, b.Bid.Price)
 		validBids = append(validBids, b)
+	}
+
+	// Fallback: when all real DSPs fail, use simulated bids from fake industry DSPs
+	if len(validBids) == 0 {
+		validBids = generateSimulatedBids(floor, impID)
+		log.Printf("[Exchange]   → Using %d simulated fallback bids", len(validBids))
+		for _, b := range validBids {
+			log.Printf("[Exchange]   %s: $%.4f (simulated)", b.DSP.Name, b.Bid.Price)
+		}
 	}
 
 	result := secondPriceAuction(validBids)
