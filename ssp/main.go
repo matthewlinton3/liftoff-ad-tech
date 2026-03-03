@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -97,7 +98,9 @@ type BidDebug struct {
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 func getExchangeURL() string {
-	if u := os.Getenv("EXCHANGE_URL"); u != "" {
+	u := strings.TrimSpace(os.Getenv("EXCHANGE_URL"))
+	u = strings.Trim(u, `"'`)
+	if u != "" {
 		return u
 	}
 	return "http://localhost:3000/auction"
@@ -317,7 +320,9 @@ func main() {
 
 	fmt.Printf("\n📰  SSP + Publisher running on http://0.0.0.0:%s\n", port)
 	fmt.Printf("    Publisher page: http://localhost:%s\n", port)
-	fmt.Printf("    Ad endpoint:    http://localhost:%s/ad\n\n", port)
+	fmt.Printf("    Ad endpoint:    http://localhost:%s/ad\n", port)
+	log.Printf("[SSP] Exchange URL: %s", getExchangeURL())
+	fmt.Println()
 
 	log.Fatal(http.ListenAndServe(addr, mux))
 }
